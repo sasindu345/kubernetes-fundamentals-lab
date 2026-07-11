@@ -1,0 +1,48 @@
+# =========================
+# Node.js
+# =========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+
+# macOS
+.DS_Store
+
+# VS Code
+.vscode/
+!.vscode/extensions.json
+
+# Build output
+dist/
+build/
+
+# Coverage
+coverage/
+
+# Temporary files
+*.tmp
+*.temp
+
+# =========================
+# Kubernetes (optional)
+# =========================
+*.kubeconfig
+
+# =========================
+# Terraform (future project)
+# =========================
+.terraform/
+*.tfstate
+*.tfstate.*
+terraform.tfvars
