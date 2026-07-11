@@ -4,6 +4,16 @@ const express = require("express");
 const cors = require("cors");
 
 const notesRoutes = require("./routes/notes");
+const pool = require("./db");
+
+pool.query("SELECT NOW()", (err, result) => {
+    if (err) {
+        console.error("Database connection failed:", err.message);
+    } else {
+        console.log("✅ Connected to PostgreSQL");
+        console.log(result.rows[0]);
+    }
+});
 
 const app = express();
 
