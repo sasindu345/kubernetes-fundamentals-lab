@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: backend-config
+  namespace: notes-app
+
+data:
+  PORT: "3000"
+
+  DB_HOST: "postgres"
+  DB_PORT: "5432"
+  DB_NAME: "notesdb"
