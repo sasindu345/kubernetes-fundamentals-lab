@@ -1,0 +1,113 @@
+name: Kubernetes CI/CD & Cluster E2E Test
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  # 1. Validate Kubernetes Manifests
+  lint-and-validate-k8s:
+    name: Lint & Validate K8s Manifests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'v1.29.0'
+
+      - name: Validate YAML Manifests via Kubectl Dry-Run
+        run: |
+          echo "🔍 Validating all Kubernetes manifests in k8s/..."
+          for file in $(find k8s/ -name "*.yaml" -o -name "*.yml"); do
+            echo "Validating: $file"
+            kubectl apply --dry-run=client -f "$file"
+          done
+          echo "✅ All Kubernetes manifests are valid!"
+
+  # 2. Build Backend Docker Image
+  build-backend:
+    name: Build Backend Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Backend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/backend/Dockerfile
+          push: false
+          tags: docker-backend:latest
+          load: true
+
+  # 3. Build Frontend Docker Image
+  build-frontend:
+    name: Build Frontend Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Frontend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/frontend/Dockerfile
+          push: false
+          tags: docker-frontend:latest
+          load: true
+
+  # 4. End-to-End Cluster Test using ephemeral KinD
+  e2e-cluster-test:
+    name: End-to-End KinD Cluster Test
+    runs-on: ubuntu-latest
+    needs: [lint-and-validate-k8s, build-backend, build-frontend]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Create KinD Cluster
+        uses: helm/kind-action@v1
+        with:
+          cluster_name: notes-cluster
+          version: v0.22.0
+
+      - name: Build Docker Images for KinD
+        run: |
+          docker build -t docker-backend:latest -f docker/backend/Dockerfile .
+          docker build -t docker-frontend:latest -f docker/frontend/Dockerfile .
+          kind load docker-image docker-backend:latest --name notes-cluster
+          kind load docker-image docker-frontend:latest --name notes-cluster
+
+      - name: Run Deployment Script
+        run: |
+          chmod +x scripts/deploy-all.sh
+          ./scripts/deploy-all.sh
+
+      - name: Wait for Pods to be Ready
+        run: |
+          echo "⏳ Waiting for PostgreSQL pod..."
+          kubectl wait --namespace notes-app --for=condition=ready pod -l app=postgres --timeout=120s
+
+          echo "⏳ Waiting for Backend pods..."
+          kubectl wait --namespace notes-app --for=condition=ready pod -l app=backend --timeout=120s
+
+          echo "⏳ Waiting for Frontend pods..."
+          kubectl wait --namespace notes-app --for=condition=ready pod -l app=frontend --timeout=120s
+
+      - name: Verify Cluster Resources
+        run: |
+          echo "📊 Final Cluster State:"
+          kubectl get all,pv,pvc,ingress -n notes-app

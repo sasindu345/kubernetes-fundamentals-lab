@@ -58,6 +58,7 @@ The project is a multi-tier production-simulation architecture deployed to Kuber
 | **10** | **Resource Limits** | CPU/Memory requests & limits, QoS classes, OOMKilled prevention | ✅ Complete | [`k8s/10-resource-limits/`](file:///Users/oneionei/Desktop/MyProjects/devops%20basic/kubernetes-fundamentals-lab/k8s/10-resource-limits) (`frontend-deployment-resources.yaml`, `backend-deployment-resources.yaml`, `postgres-deployment-resources.yaml`) |
 | **11** | **Health Checks** | `livenessProbe`, `readinessProbe`, `startupProbe`, self-healing | ✅ Complete | [`k8s/11-health-checks/`](file:///Users/oneionei/Desktop/MyProjects/devops%20basic/kubernetes-fundamentals-lab/k8s/11-health-checks) (`frontend-deployment-health.yaml`, `backend-deployment-health.yaml`, `postgres-deployment-health.yaml`) |
 | **12** | **Rolling Updates** | Zero-downtime rollouts, rollback strategies, revision history | ✅ Complete | [`k8s/12-rolling-update/`](file:///Users/oneionei/Desktop/MyProjects/devops%20basic/kubernetes-fundamentals-lab/k8s/12-rolling-update) (`frontend-deployment-rolling.yaml`, `backend-deployment-rolling.yaml`) |
+| **CI/CD** | **GitHub Actions** | Automated manifest linting, Docker buildx, KinD E2E cluster testing | ✅ Complete | [`.github/workflows/ci-cd.yml`](file:///Users/oneionei/Desktop/MyProjects/devops%20basic/kubernetes-fundamentals-lab/.github/workflows/ci-cd.yml) |
 
 ---
 
