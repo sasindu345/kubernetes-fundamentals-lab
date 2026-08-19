@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000/api/notes";
+const API_URL = "/api/notes";
 
 // Load notes when page opens
 window.onload = () => {
