@@ -15,19 +15,15 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up Kubectl
-        uses: azure/setup-kubectl@v4
-        with:
-          version: 'v1.29.0'
-
-      - name: Validate YAML Manifests via Kubectl Dry-Run
+      - name: Install and Run Kubeconform
         run: |
-          echo "🔍 Validating all Kubernetes manifests in k8s/..."
-          for file in $(find k8s/ -name "*.yaml" -o -name "*.yml"); do
-            echo "Validating: $file"
-            kubectl apply --dry-run=client --validate=false -f "$file"
-          done
-          echo "✅ All Kubernetes manifests syntax is valid!"
+          echo "🔍 Installing Kubeconform..."
+          curl -sL https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz | tar xz kubeconform
+          sudo mv kubeconform /usr/local/bin/
+
+          echo "🔍 Validating all Kubernetes manifests in k8s/ against schemas..."
+          kubeconform -summary -strict -ignore-missing-schemas k8s/
+          echo "✅ All Kubernetes manifests passed schema validation!"
 
   # 2. Build Backend Docker Image
   build-backend:
